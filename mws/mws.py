@@ -557,6 +557,15 @@ class Sellers(MWS):
         """
         data = dict(Action='ListMarketplaceParticipations', NextToken=token)
         return self.make_request(data)
+        
+    def get_auth_token(self):
+        """
+            The GetAuthToken operation returns an authorization token (MWSAuthToken) for the given seller and developer. 
+            If an authorization token already exists for the given seller and developer, it is returned. 
+            If an authorization token does not already exist for the given seller and developer, it is created and returned.
+        """
+        data = dict(Action='GetAuthToken')
+        return self.make_request(data)
 
 
 #### Fulfillment APIs ####
