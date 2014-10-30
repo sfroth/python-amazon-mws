@@ -36,16 +36,16 @@ __all__ = [
 # for a list of the end points and marketplace IDs
 
 MARKETPLACES = {
-    "CA" : "https://mws.amazonservices.ca", #A2EUQ1WTGCTBG2
-    "US" : "https://mws.amazonservices.com", #ATVPDKIKX0DER",
-    "DE" : "https://mws-eu.amazonservices.com", #A1PA6795UKMFR9
-    "ES" : "https://mws-eu.amazonservices.com", #A1RKKUPIHCS9HS
-    "FR" : "https://mws-eu.amazonservices.com", #A13V1IB3VIYZZH
-    "IN" : "https://mws.amazonservices.in", #A21TJRUUN4KGV
-    "IT" : "https://mws-eu.amazonservices.com", #APJ6JRA9NG5V4
-    "UK" : "https://mws-eu.amazonservices.com", #A1F83G8C2ARO7P
-    "JP" : "https://mws.amazonservices.jp", #A1VC38T7YXB528
-    "CN" : "https://mws.amazonservices.com.cn", #AAHKV2X7AFYLW
+    "CA": "https://mws.amazonservices.ca",      # A2EUQ1WTGCTBG2
+    "US": "https://mws.amazonservices.com",     # ATVPDKIKX0DER
+    "DE": "https://mws-eu.amazonservices.com",  # A1PA6795UKMFR9
+    "ES": "https://mws-eu.amazonservices.com",  # A1RKKUPIHCS9HS
+    "FR": "https://mws-eu.amazonservices.com",  # A13V1IB3VIYZZH
+    "IN": "https://mws.amazonservices.in",      # A21TJRUUN4KGV
+    "IT": "https://mws-eu.amazonservices.com",  # APJ6JRA9NG5V4
+    "UK": "https://mws-eu.amazonservices.com",  # A1F83G8C2ARO7P
+    "JP": "https://mws.amazonservices.jp",      # A1VC38T7YXB528
+    "CN": "https://mws.amazonservices.com.cn",  # AAHKV2X7AFYLW
 }
 
 
