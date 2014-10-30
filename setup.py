@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from setuptools import setup, find_packages
 
 version = '0.6'
 
-REQUIREMENTS = ['requests']
+REQUIREMENTS = ['requests', 'six']
 
 CLASSIFIERS = [
     'Development Status :: 2 - Pre-Alpha',

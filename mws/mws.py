@@ -4,12 +4,18 @@
 # Basic interface to Amazon MWS
 # Based on http://code.google.com/p/amazon-mws-python
 #
+from __future__ import absolute_import
 
-import urllib
+try: # Python 3.x
+    from urllib.parse import quote
+except: # Python 2.x
+    from urllib import quote
+import six
+
 import hashlib
 import hmac
 import base64
-import utils
+from . import utils
 import re
 try:
     from xml.etree.ElementTree import ParseError as XMLError
@@ -71,7 +77,7 @@ def remove_empty(d):
         Helper function that removes all keys from a dictionary (d),
         that have an empty value.
     """
-    for key in d.keys():
+    for key in list(d.keys()):
         if not d[key]:
             del d[key]
     return d
@@ -87,7 +93,7 @@ class DictWrapper(object):
         self.original = xml
         self._rootkey = rootkey
         self._mydict = utils.xml2dict().fromstring(remove_namespace(xml))
-        self._response_dict = self._mydict.get(self._mydict.keys()[0],
+        self._response_dict = self._mydict.get(list(self._mydict.keys())[0],
                                                self._mydict)
 
     @property
@@ -155,7 +161,7 @@ class MWS(object):
             self.domain = MARKETPLACES[region]
         else:
             error_msg = "Incorrect region supplied ('%(region)s'). Must be one of the following: %(marketplaces)s" % {
-                "marketplaces" : ', '.join(MARKETPLACES.keys()),
+                "marketplaces" : ', '.join(list(MARKETPLACES.keys())),
                 "region" : region,
             }
             raise MWSError(error_msg)
@@ -179,9 +185,9 @@ class MWS(object):
         if self.auth_token:
             params['MWSAuthToken'] = self.auth_token                    
         params.update(extra_data)
-        request_description = '&'.join(['%s=%s' % (k, urllib.quote(params[k], safe='-_.~').encode('utf-8')) for k in sorted(params)])
+        request_description = '&'.join(['%s=%s' % (k, quote(params[k], safe='-_.~')) for k in sorted(params)])
         signature = self.calc_signature(method, request_description)
-        url = '%s%s?%s&Signature=%s' % (self.domain, self.uri, request_description, urllib.quote(signature))
+        url = '%s%s?%s&Signature=%s' % (self.domain, self.uri, request_description, quote(signature))
         headers = {'User-Agent': 'python-amazon-mws/0.0.1 (Language=Python)'}
         headers.update(kwargs.get('extra_headers', {}))
 
@@ -195,7 +201,7 @@ class MWS(object):
             # When retrieving data from the response object,
             # be aware that response.content returns the content in bytes while response.text calls
             # response.content and converts it to unicode.
-            data = response.content
+            data = response.text
 
             # I do not check the headers to decide which content structure to server simply because sometimes
             # Amazon's MWS API returns XML error responses with "text/plain" as the Content-Type.
@@ -204,7 +210,7 @@ class MWS(object):
             except XMLError:
                 parsed_response = DataWrapper(data, response.headers)
 
-        except HTTPError, e:
+        except HTTPError as e:
             error = MWSError(str(e))
             error.response = e.response
             raise error
@@ -224,8 +230,9 @@ class MWS(object):
     def calc_signature(self, method, request_description):
         """Calculate MWS signature to interface with Amazon
         """
-        sig_data = method + '\n' + self.domain.replace('https://', '').lower() + '\n' + self.uri + '\n' + request_description
-        return base64.b64encode(hmac.new(str(self.secret_key), sig_data, hashlib.sha256).digest())
+        sig_data = six.b(method + '\n' + self.domain.replace('https://', '').lower() + '\n' + self.uri + '\n' + request_description)
+        key = six.b(self.secret_key)
+        return base64.b64encode(hmac.new(key, sig_data, hashlib.sha256).digest())
 
     def get_timestamp(self):
         """
