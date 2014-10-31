@@ -6,9 +6,9 @@
 #
 from __future__ import absolute_import
 
-try: # Python 3.x
+try:  # Python 3.x
     from urllib.parse import quote
-except: # Python 2.x
+except:  # Python 2.x
     from urllib import quote
 import six
 
@@ -17,6 +17,7 @@ import hmac
 import base64
 from . import utils
 import re
+
 try:
     from xml.etree.ElementTree import ParseError as XMLError
 except ImportError:
@@ -42,15 +43,15 @@ __all__ = [
 # for a list of the end points and marketplace IDs
 
 MARKETPLACES = {
-    "CA": "https://mws.amazonservices.ca",      # A2EUQ1WTGCTBG2
-    "US": "https://mws.amazonservices.com",     # ATVPDKIKX0DER
+    "CA": "https://mws.amazonservices.ca",  # A2EUQ1WTGCTBG2
+    "US": "https://mws.amazonservices.com",  # ATVPDKIKX0DER
     "DE": "https://mws-eu.amazonservices.com",  # A1PA6795UKMFR9
     "ES": "https://mws-eu.amazonservices.com",  # A1RKKUPIHCS9HS
     "FR": "https://mws-eu.amazonservices.com",  # A13V1IB3VIYZZH
-    "IN": "https://mws.amazonservices.in",      # A21TJRUUN4KGV
+    "IN": "https://mws.amazonservices.in",  # A21TJRUUN4KGV
     "IT": "https://mws-eu.amazonservices.com",  # APJ6JRA9NG5V4
     "UK": "https://mws-eu.amazonservices.com",  # A1F83G8C2ARO7P
-    "JP": "https://mws.amazonservices.jp",      # A1VC38T7YXB528
+    "JP": "https://mws.amazonservices.jp",  # A1VC38T7YXB528
     "CN": "https://mws.amazonservices.com.cn",  # AAHKV2X7AFYLW
 }
 
@@ -108,6 +109,7 @@ class DataWrapper(object):
     """
         Text wrapper in charge of validating the hash sent by Amazon.
     """
+
     def __init__(self, data, header):
         self.original = data
         if 'content-md5' in header:
@@ -161,8 +163,8 @@ class MWS(object):
             self.domain = MARKETPLACES[region]
         else:
             error_msg = "Incorrect region supplied ('%(region)s'). Must be one of the following: %(marketplaces)s" % {
-                "marketplaces" : ', '.join(list(MARKETPLACES.keys())),
-                "region" : region,
+                "marketplaces": ', '.join(list(MARKETPLACES.keys())),
+                "region": region,
             }
             raise MWSError(error_msg)
 
@@ -183,7 +185,7 @@ class MWS(object):
             'SignatureMethod': 'HmacSHA256',
         }
         if self.auth_token:
-            params['MWSAuthToken'] = self.auth_token                    
+            params['MWSAuthToken'] = self.auth_token
         params.update(extra_data)
         request_description = '&'.join(['%s=%s' % (k, quote(params[k], safe='-_.~')) for k in sorted(params)])
         signature = self.calc_signature(method, request_description)
@@ -230,7 +232,8 @@ class MWS(object):
     def calc_signature(self, method, request_description):
         """Calculate MWS signature to interface with Amazon
         """
-        sig_data = six.b(method + '\n' + self.domain.replace('https://', '').lower() + '\n' + self.uri + '\n' + request_description)
+        sig_data = six.b(
+            method + '\n' + self.domain.replace('https://', '').lower() + '\n' + self.uri + '\n' + request_description)
         key = six.b(self.secret_key)
         return base64.b64encode(hmac.new(key, sig_data, hashlib.sha256).digest())
 
@@ -282,7 +285,7 @@ class Feeds(MWS):
                                  extra_headers={'Content-MD5': md, 'Content-Type': content_type})
 
     def get_feed_submission_list(self, feedids=None, max_count=None, feedtypes=None,
-                                    processingstatuses=None, fromdate=None, todate=None):
+                                 processingstatuses=None, fromdate=None, todate=None):
         """
         Returns a list of all feed submissions submitted in the previous 90 days.
         That match the query parameters.
@@ -291,7 +294,7 @@ class Feeds(MWS):
         data = dict(Action='GetFeedSubmissionList',
                     MaxCount=max_count,
                     SubmittedFromDate=fromdate,
-                    SubmittedToDate=todate,)
+                    SubmittedToDate=todate, )
         data.update(self.enumerate_param('FeedSubmissionIdList.Id', feedids))
         data.update(self.enumerate_param('FeedTypeList.Type.', feedtypes))
         data.update(self.enumerate_param('FeedProcessingStatusList.Status.', processingstatuses))
@@ -327,7 +330,7 @@ class Reports(MWS):
 
     ACCOUNT_TYPE = "Merchant"
 
-    ## REPORTS ###
+    # # REPORTS ###
 
     def get_report(self, report_id):
         data = dict(Action='GetReport', ReportId=report_id)
@@ -411,7 +414,6 @@ class Orders(MWS):
     def list_orders(self, marketplaceids, created_after=None, created_before=None, lastupdatedafter=None,
                     lastupdatedbefore=None, orderstatus=(), fulfillment_channels=(),
                     payment_methods=(), buyer_email=None, seller_orderid=None, max_results='100'):
-
         data = dict(Action='ListOrders',
                     CreatedAfter=created_after,
                     CreatedBefore=created_before,
@@ -420,7 +422,7 @@ class Orders(MWS):
                     BuyerEmail=buyer_email,
                     SellerOrderId=seller_orderid,
                     MaxResultsPerPage=max_results,
-                    )
+        )
         data.update(self.enumerate_param('OrderStatus.Status.', orderstatus))
         data.update(self.enumerate_param('MarketplaceId.Id.', marketplaceids))
         data.update(self.enumerate_param('FulfillmentChannel.Channel.', fulfillment_channels))
@@ -569,7 +571,7 @@ class Sellers(MWS):
         return self.make_request(data)
 
 
-#### Fulfillment APIs ####
+# ### Fulfillment APIs ####
 
 
 class InboundShipments(MWS):
@@ -592,7 +594,7 @@ class Inventory(MWS):
         data = dict(Action='ListInventorySupply',
                     QueryStartDateTime=datetime,
                     ResponseGroup=response_group,
-                    )
+        )
         data.update(self.enumerate_param('SellerSkus.member.', skus))
         return self.make_request(data, "POST")
 
@@ -608,7 +610,6 @@ class OutboundShipments(MWS):
 
 
 class Recommendations(MWS):
-
     """ Amazon MWS Recommendations API """
 
     URI = '/Recommendations/2013-04-01'
