@@ -25,6 +25,11 @@ You can read the official Amazon MWS documentation [here](https://developer.amaz
 * Finish InboundShipments & OutboundShipments APIs
 * Finish Docs
 
+# Notes About MWS
+
+* Amazon does not provide a sandbox, every changes you do with this client is submitted to a Amazon marketplace
+* Amazon uses clusters, not every response is the same respone like some seconds ago.
+
 # Contribute
 
 If you like the project, please, contact me at commonzenpython@gmail.com (gtalk and email) and help me improve it.
