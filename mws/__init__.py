@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-__version__ = '0.4'
-
-from mws import *
+from __future__ import absolute_import
+from .mws import *
+__version__ = '0.6'

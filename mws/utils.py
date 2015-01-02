@@ -6,6 +6,7 @@ Borrowed from https://github.com/timotheus/ebaysdk-python
 
 @author: pierre
 """
+from __future__ import absolute_import
 
 import xml.etree.ElementTree as ET
 import re
@@ -25,6 +26,7 @@ class object_dict(dict):
     >>> a.test, a.test2.name, a.test2.value
     (1, 'test2', 2)
     """
+
     def __init__(self, initd=None):
         if initd is None:
             initd = {}
@@ -51,7 +53,6 @@ class object_dict(dict):
 
 
 class xml2dict(object):
-
     def __init__(self):
         pass
 
@@ -60,10 +61,10 @@ class xml2dict(object):
         # Save attrs and text, hope there will not be a child with same name
         if node.text:
             node_tree.value = node.text
-        for (k, v) in node.attrib.items():
-            k, v = self._namespace_split(k, object_dict({'value':v}))
+        for (k, v) in list(node.attrib.items()):
+            k, v = self._namespace_split(k, object_dict({'value': v}))
             node_tree[k] = v
-        #Save childrens
+        # Save childrens
         for child in node.getchildren():
             tag, tree = self._namespace_split(child.tag,
                                               self._parse_node(child))
@@ -88,7 +89,7 @@ class xml2dict(object):
         if result:
             value.namespace, tag = result.groups()
 
-        return (tag, value)
+        return tag, value
 
     def parse(self, file):
         """parse a xml file to a dict"""
