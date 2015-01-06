@@ -436,7 +436,7 @@ class Orders(MWS):
         data.update(self.enumerate_param('PaymentMethod.Method.', payment_methods))
         return self.make_request(data)
 
-    def list_orders_by_next_token(self, token, CbaDisplayableShippingLabel=None, order_type=None,
+    def list_orders_by_next_token(self, token, cba_displayable_shipping_label=None, order_type=None,
                                   earliest_ship_date=None, latest_ship_date=None):
 
         data = dict(Action='ListOrdersByNextToken',
@@ -448,7 +448,7 @@ class Orders(MWS):
                     )
         return self.make_request(data)
 
-    def get_order(self, amazon_order_ids, CbaDisplayableShippingLabel=None, order_type=None,
+    def get_order(self, amazon_order_ids, cba_displayable_shipping_label=None, order_type=None,
                   earliest_ship_date=None, latest_ship_date=None):
         
         data = dict(Action='GetOrder',
