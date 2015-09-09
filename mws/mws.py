@@ -111,9 +111,9 @@ class DataWrapper(object):
     """
 
     def __init__(self, data, header):
-        self.original = data
+        self.original = data.encode('utf-8')
         if 'content-md5' in header:
-            hash_ = calc_md5(self.original)
+            hash_ = calc_md5(self.original).decode('utf-8')
             if header['content-md5'] != hash_:
                 raise MWSError("Wrong Contentlength, maybe amazon error...")
 
