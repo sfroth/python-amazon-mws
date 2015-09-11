@@ -390,6 +390,12 @@ class Reports(MWS):
         data.update(self.enumerate_param('MarketplaceIdList.Id.', marketplaceids))
         return self.make_request(data)
 
+    def update_report_acknowledgements(self, reportids=(), acknowledged='false'):
+        data = dict(Action='UpdateReportAcknowledgements',
+                    Acknowledged=acknowledged)
+        data.update(self.enumerate_param('ReportIdList.Id.', reportids))
+        return self.make_request(data)
+
 
     ### ReportSchedule ###
 
