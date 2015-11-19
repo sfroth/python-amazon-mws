@@ -87,13 +87,12 @@ def dt_iso_or_none(d):
     Otherwise, return None
     """
     # If d is a datetime object, format it to iso and return
-    if isinstance(d, datetime):
+    try:
         return d.isoformat()
-        
-    # TODO: if d is a string in iso8601 already, return it
-    
-    # none of the above: return None
-    return None
+    except AttributeError:
+        return d
+    else:
+        return None
 
 
 def remove_namespace(xml):
