@@ -37,6 +37,7 @@ __all__ = [
     'Products',
     'Recommendations',
     'Sellers',
+    'OutboundShipments',
 ]
 
 # See https://images-na.ssl-images-amazon.com/images/G/01/mwsportal/doc/en_US/bde/MWSDeveloperGuide._V357736853_.pdf page 8
@@ -82,6 +83,20 @@ def remove_empty(d):
         if not d[key]:
             del d[key]
     return d
+
+
+def flatten(data):
+    """
+        Helper function that allows adding dictionaries to dictionary,
+        then flattens those to the appropriate keys/values
+    """
+    for key in list(data.keys()):
+        value = data[key]
+        if isinstance(value, dict):
+            for subkey, item in value.items():
+                data['{}.{}'.format(key, subkey)] = item
+            del data[key]
+    return data
 
 
 def remove_namespace(xml):
@@ -174,7 +189,7 @@ class MWS(object):
 
         # Remove all keys with an empty value because
         # Amazon's MWS does not allow such a thing.
-        extra_data = remove_empty(extra_data)
+        extra_data = flatten(remove_empty(extra_data))
 
         params = {
             'AWSAccessKeyId': self.access_key,
@@ -699,7 +714,86 @@ class Inventory(MWS):
 class OutboundShipments(MWS):
     URI = "/FulfillmentOutboundShipment/2010-10-01"
     VERSION = "2010-10-01"
-    # To be completed
+
+    def get_fulfillment_preview(self, address, items, shipping_speeds=['Standard', 'Expedited', 'Priority']):  # , include_cod=False, include_delivery_windows=False):  - COD settings only for JP and CN
+        """ Returns preview of fulfillment shipment """
+
+        data = dict(Action='GetFulfillmentPreview',
+                    Address=address,
+        )
+        data.update(self.enumerate_param('Items.member.', items))
+        data.update(self.enumerate_param('ShippingSpeedCategories.member.', shipping_speeds))
+        return self.make_request(data, "POST")
+
+    def create_fulfillment_order(self, seller_orderid, display_order_id, display_order_date, display_order_comment, address, items, fulfillment_action='Ship', shipping_speed='Standard', fulfillment_policy='FillOrKill', notification_emails=[]):  # COD settings for JP and CN excluded
+        """ Create fulfillment shipment """
+
+        data = dict(Action='CreateFulfillmentOrder',
+                    SellerFulfillmentOrderId=seller_orderid,
+                    FulfillmentAction=fulfillment_action,
+                    DisplayableOrderId=display_order_id,
+                    DisplayableOrderDateTime=display_order_date,
+                    DisplayableOrderComment=display_order_comment,
+                    ShippingSpeedCategory=shipping_speed,
+                    DestinationAddress=address,
+                    FulfillmentPolicy=fulfillment_policy,
+        )
+        data.update(self.enumerate_param('Items.member.', items))
+        data.update(self.enumerate_param('NotificationEmailList.member.', notification_emails))
+        return self.make_request(data, "POST")
+
+    def update_fulfillment_order(self, seller_orderid, display_order_id, display_order_date, display_order_comment, address, items, fulfillment_action='Ship', shipping_speed='Standard', fulfillment_policy='FillOrKill', notification_emails=[]):  # COD settings for JP and CN excluded
+        """ Update fulfillment shipment previously created in Hold status """
+
+        data = dict(Action='UpdateFulfillmentOrder',
+                    SellerFulfillmentOrderId=seller_orderid,
+                    FulfillmentAction=fulfillment_action,
+                    DisplayableOrderId=display_order_id,
+                    DisplayableOrderDateTime=display_order_date,
+                    DisplayableOrderComment=display_order_comment,
+                    ShippingSpeedCategory=shipping_speed,
+                    DestinationAddress=address,
+                    FulfillmentPolicy=fulfillment_policy,
+        )
+        data.update(self.enumerate_param('Items.member.', items))
+        data.update(self.enumerate_param('NotificationEmailList.member.', notification_emails))
+        return self.make_request(data, "POST")
+
+    def get_fulfillment_order(self, seller_orderid):
+        """ Returns information on single fulfillment order by merchant order identifier """
+
+        data = dict(Action='GetFulfillmentOrder',
+                    SellerFulfillmentOrderId=seller_orderid,
+        )
+        return self.make_request(data, "POST")
+
+    def list_all_fulfillment_orders(self, datetime):
+        """ Returns information on fulfillment orders since datetime """
+
+        data = dict(Action='ListAllFulfillmentOrders',
+                    QueryStartDateTime=datetime,
+        )
+        return self.make_request(data, "POST")
+
+    def list_all_fulfillment_orders_by_next_token(self, token):
+        data = dict(Action='ListAllFulfillmentOrdersByNextToken', NextToken=token)
+        return self.make_request(data, "POST")
+
+    def get_package_tracking_details(self, package_number):
+        """ Returns package tracking information based on package number retrieved from GetFulfillmentOrder """
+
+        data = dict(Action='GetPackageTrackingDetails',
+                    PackageNumber=package_number,
+        )
+        return self.make_request(data, "POST")
+
+    def cancel_fulfillment_order(self, seller_orderid):
+        """ Cancel fulfillment order by merchant order identifier """
+
+        data = dict(Action='CancelFulfillmentOrder',
+                    SellerFulfillmentOrderId=seller_orderid,
+        )
+        return self.make_request(data, "POST")
 
 
 class Recommendations(MWS):
